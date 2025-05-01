@@ -10,7 +10,8 @@ public class View : MonoBehaviour
 
     Controller controller;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    SquareView[,] gridView;
+
     void Awake()
     {
         controller = new Controller(this);
@@ -27,8 +28,17 @@ public class View : MonoBehaviour
                 int2 coor = board.GetSquare(i, j).Coor;
                 newSquare.GetComponentInChildren<TextMeshProUGUI>().text = $"{coor.x},{coor.y}";
             }
-
         }
+    }
+
+    public void AddPiece(ref Piece piece, int2 coor)
+    {
+        gridView[coor.x, coor.y].AddPiece(ref piece);
+    }
+
+    public void RemovePiece(ref Piece piece) 
+    { 
+
     }
 
 }

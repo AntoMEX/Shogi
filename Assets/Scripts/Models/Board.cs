@@ -22,7 +22,6 @@ public struct Board
         }
         //Debug.Log(grid[3, 0].GetCoor);
     }
-
     public ref Square GetSquare(int row, int col) => ref grid[row, col]; //Pide row y column y regresa la copia del square
 
     //~Board() {}
@@ -33,10 +32,13 @@ public struct Square
     int2 coor; //Unity.Mathematics  enteros bidimensionales
     //float2 coor; Unity.Mathematics  flotantes bidimensionales
 
+    public Piece piece;
+
     //public int2 GetCoor => coor;
     public Square(int x, int y) 
     { 
         coor = new int2(x, y);
+        piece = null;
     }
 
     //~Square() {}
