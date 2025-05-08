@@ -7,9 +7,12 @@ public class Controller
 {
     View view;
     Board board;
+    Piece selectedPiece;
 
     const int ROWS = 9;
     const int COLS = 9;
+
+    Team curentTurn = Team.White;
 
     public Board BOARD => board;
     public Controller(View view)
@@ -24,8 +27,87 @@ public class Controller
 
     void SetBoard()
     {
-        CreatePiece(new int2(2,6), PieceType.Pawn, Team.White);
-        CreatePiece(new int2(1, 2), PieceType.Pawn, Team.Black);
+        //Peones
+        for (int i = 0; i < ROWS; i++)
+        {
+            CreatePiece(new int2(i, 6), PieceType.Pawn, Team.White);
+            CreatePiece(new int2(i, 2), PieceType.Pawn, Team.Black);
+        }
+
+        //Lanzas
+        CreatePiece(new int2(0, 8), PieceType.Spear, Team.White);
+        CreatePiece(new int2(8, 8), PieceType.Spear, Team.White);
+        CreatePiece(new int2(0, 0), PieceType.Spear, Team.Black);
+        CreatePiece(new int2(8, 0), PieceType.Spear, Team.Black);
+
+        //Caballos
+        CreatePiece(new int2(1, 8), PieceType.Horse, Team.White);
+        CreatePiece(new int2(7, 8), PieceType.Horse, Team.White);
+        CreatePiece(new int2(1, 0), PieceType.Horse, Team.Black);
+        CreatePiece(new int2(7, 0), PieceType.Horse, Team.Black);
+
+        //Alfiles
+        CreatePiece(new int2(1, 7), PieceType.Bishop, Team.White);
+        CreatePiece(new int2(7, 1), PieceType.Bishop, Team.Black);
+
+        //Torres
+        CreatePiece(new int2(7, 7), PieceType.Tower, Team.White);
+        CreatePiece(new int2(1, 1), PieceType.Tower, Team.Black);
+
+        //Plateados
+        CreatePiece(new int2(2, 8), PieceType.Silver, Team.White);
+        CreatePiece(new int2(6, 8), PieceType.Silver, Team.White);
+        CreatePiece(new int2(2, 0), PieceType.Silver, Team.Black);
+        CreatePiece(new int2(6, 0), PieceType.Silver, Team.Black);
+
+        //Dorados
+        CreatePiece(new int2(3, 8), PieceType.Gold, Team.White);
+        CreatePiece(new int2(5, 8), PieceType.Gold, Team.White);
+        CreatePiece(new int2(3, 0), PieceType.Gold, Team.Black);
+        CreatePiece(new int2(5, 0), PieceType.Gold, Team.Black);
+
+        //Reyes
+        CreatePiece(new int2(4, 8), PieceType.King, Team.White);
+        CreatePiece(new int2(4, 0), PieceType.King, Team.Black);
+    }
+
+    public void SelectSquare(int2 gridPos)
+    {
+        ref Square selectedSquare = ref board.GetSquare(gridPos.x, gridPos.y); //referencia de Square, no copia
+        if(selectedPiece != null)
+        {
+            if (selectedSquare.piece == null)
+            {
+                MoveSelectedPiece(selectedSquare);
+            }
+            else if (selectedSquare.piece.team == curentTurn)
+            {
+                selectedPiece = selectedSquare.piece;
+            }
+            else
+            {
+                EatPiece(selectedSquare.Coor);
+                MoveSelectedPiece(selectedSquare);
+            }
+        }
+        else
+        {
+            if(selectedSquare.piece == null) return;
+            if(selectedSquare.piece.team != curentTurn) return;
+            selectedPiece = selectedSquare.piece;
+        }
+    }
+
+    void EatPiece(int2 coor)
+    {
+        
+    }
+
+    private void MoveSelectedPiece(Square selectedSquare)
+    {
+        RemovePiece(selectedPiece.coor);
+        AddPiece(ref selectedPiece, selectedSquare.Coor);
+        selectedPiece = null;
     }
 
     void CreatePiece(int2 coor, PieceType type, Team team)
@@ -65,11 +147,21 @@ public class Controller
         view.AddPiece(ref piece, coor);
     }
 
+    void RemovePiece(int2 coor)
+    {
+        board.GetSquare(coor.x, coor.y).piece = null;
+        view.RemovePiece(coor);
+    }
+
+    void AddPiece(ref Piece piece, int2 coor)
+    {
+        board.GetSquare(coor.x, coor.y).piece = piece;
+        piece.coor = coor;
+        view.AddPiece(ref piece, coor);
+    }
+
     ~Controller()
     {
 
     }
-
-
-
 }

@@ -22,6 +22,7 @@ public struct Board
         }
         //Debug.Log(grid[3, 0].GetCoor);
     }
+
     public ref Square GetSquare(int row, int col) => ref grid[row, col]; //Pide row y column y regresa la copia del square
 
     //~Board() {}
