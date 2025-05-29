@@ -8,8 +8,8 @@ public class View : MonoBehaviour
 
     [SerializeField] Transform gridParent;
 
-    [SerializeField] CemeteryView whiteCemetery;
-    [SerializeField] CemeteryView blackCemetery;
+    //[SerializeField] CemeteryView whiteCemetery;
+    //[SerializeField] CemeteryView blackCemetery;
 
     Controller controller;
 
@@ -22,11 +22,11 @@ public class View : MonoBehaviour
 
     private void Start()
     {
-        whiteCemetery.SetCemetaryView(this);
-        blackCemetery.SetCemetaryView(this);
+        /*whiteCemetery.SetCemetaryView(this);
+        blackCemetery.SetCemetaryView(this);*/
     }
 
-    public void EnableTeamCemetary(Team team)
+    /*public void EnableTeamCemetary(Team team)
     {
         if (team == Team.White)
         {
@@ -38,7 +38,7 @@ public class View : MonoBehaviour
             whiteCemetery.EnableCemetaryView(false);
             blackCemetery.EnableCemetaryView();
         }
-    }
+    }*/
 
     public void CreateGrid(ref Board board, int rows, int cols)
     {
@@ -77,17 +77,17 @@ public class View : MonoBehaviour
         controller.SelectCemetarySquare(pieceType);
     }
 
-    public void UpdateCemetary(Team team, PieceType pieceType, int count)
-    {
-        if(team == Team.White)
-        {
-            whiteCemetery.UpdateCellView(pieceType, count);
-        }
-        else
-        {
-            blackCemetery.UpdateCellView(pieceType, count);
-        }
-    }
+    //public void UpdateCemetary(Team team, PieceType pieceType, int count)
+    //{
+    //    if(team == Team.White)
+    //    {
+    //        whiteCemetery.UpdateCellView(pieceType, count);
+    //    }
+    //    else
+    //    {
+    //        blackCemetery.UpdateCellView(pieceType, count);
+    //    }
+    //}
 }
 
 //Solo manda a llamar al controller

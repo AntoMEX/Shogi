@@ -5,9 +5,9 @@ using UnityEngine.UI;
 
 public class SquareView : MonoBehaviour
 {
+    [Header("Components")]
     TextMeshProUGUI text;
-    [SerializeField] 
-    Image imageComponent;
+    [SerializeField] Image imageComponent;
     Button buttonComponent;
     View view;
 
@@ -21,6 +21,14 @@ public class SquareView : MonoBehaviour
     [SerializeField] Sprite goldSprite;
     [SerializeField] Sprite whiteKingSprite;
     [SerializeField] Sprite blackKingSprite;
+
+    [Header("Sprites Mejorados")]
+    [SerializeField] Sprite upPawnSprite;
+    [SerializeField] Sprite upSpearSprite;
+    [SerializeField] Sprite upHorseSprite;
+    [SerializeField] Sprite upBishopSprite;
+    [SerializeField] Sprite upTowerSprite;
+    [SerializeField] Sprite upSilverSprite;
 
     int2 gridPos;
 
@@ -64,6 +72,12 @@ public class SquareView : MonoBehaviour
             PieceType.Silver => silverSprite,
             PieceType.Gold => goldSprite,
             PieceType.King => piece.team == Team.White ? whiteKingSprite : blackKingSprite, //if(Team == White) {whiteKingSprite} else blackKingSprite
+            PieceType.UpPawn => upPawnSprite,
+            PieceType.UpSpear => upSpearSprite,
+            PieceType.UpHorse => upHorseSprite,
+            PieceType.UpBishop => upBishopSprite,
+            PieceType.UpTower => upTowerSprite,
+            PieceType.UpSilver => upSilverSprite,
             _ => null
         };
 
@@ -77,8 +91,8 @@ public class SquareView : MonoBehaviour
 
     public void RemovePiece()
     {
-        text.enabled = true;
         imageComponent.enabled = false;
+        text.enabled = true;
     }
 
     void OnSelectSquare()

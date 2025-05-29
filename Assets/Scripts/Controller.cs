@@ -30,11 +30,17 @@ public class Controller
         view.CreateGrid(ref board, ROWS, COLS);
         SetBoard();
         //view.RemovePiece(new int2(0, 1));
-
+        whitePlayer = new Player(Team.White);
+        blackPlayer = new Player(Team.Black);
+        //view.EnableTeamCemetary(curentTurn);
     }
 
     void SetBoard()
     {
+        CreatePiece(new int2(5, 3), PieceType.Silver, Team.White);
+        CreatePiece(new int2(3, 3), PieceType.Silver, Team.Black);
+
+
         //Peones
         for (int i = 0; i < ROWS; i++)
         {
@@ -89,7 +95,7 @@ public class Controller
                 if(!IsValidMove(selectedSquare.Coor) && selectedPiece.coor.x >= 0) return;
                 if(selectedPiece.coor.x < 0)
                 {
-                    UpdateCemetaryCount(selectedPiece.type);
+                    //UpdateCemetaryCount(selectedPiece.type);
                 }
                 MoveSelectedPiece(selectedSquare);
                 SwitchTeam();
@@ -105,7 +111,9 @@ public class Controller
             else if(selectedPiece.coor.x >= 0) //Comer
             {
                 if (!IsValidMove(selectedSquare.Coor)) return;
+                
                 EatPiece(ref selectedSquare.piece);
+                //Debug.Log("Pues");
                 MoveSelectedPiece(selectedSquare);
                 SwitchTeam();
             }
@@ -135,7 +143,42 @@ public class Controller
         List<int2> pieceMoves = selectedPiece.GetMoves();
         int2 pieceCoor = selectedPiece.coor;
 
-        if (selectedPiece.GetType().IsSubclassOf(typeof(SingleMovePiece)))
+        if (selectedPiece.GetType().IsSubclassOf(typeof(ComplexUpgradedPiece)))
+        {
+            ComplexUpgradedPiece complexPiece = (ComplexUpgradedPiece)piece;
+            foreach (int2 move in complexPiece.GetComplexMoves().moves)
+            {
+                int2 newCoor;
+                newCoor.x = move.x;
+                newCoor.y = curentTurn == Team.White ? move.y : -move.y;
+                newCoor += pieceCoor;
+                if (newCoor.x < 0 || newCoor.x >= ROWS) continue;
+                if (newCoor.y < 0 || newCoor.y >= ROWS) continue;
+                if (board.GetSquare(newCoor.x, newCoor.y).piece != null)
+                {
+                    if (board.GetSquare(newCoor.x, newCoor.y).piece.team == curentTurn) continue;
+                }
+                validMoves.Add(newCoor);
+            }
+            foreach (int2 direction in complexPiece.GetComplexMoves().directions)
+            {
+                for (int i = 1; i <= 8; i++)
+                {
+                    int2 newCoor = pieceCoor + direction * i;
+                    if (newCoor.x < 0 || newCoor.x >= ROWS) break;
+                    if (newCoor.y < 0 || newCoor.y >= ROWS) break;
+                    if (board.GetSquare(newCoor.x, newCoor.y).piece != null)
+                    {
+                        if (board.GetSquare(newCoor.x, newCoor.y).piece.team == curentTurn) break;
+                        validMoves.Add(newCoor);
+                        break;
+                    }
+                    validMoves.Add(newCoor);
+                }
+            }
+        }
+
+        else if (selectedPiece.GetType().IsSubclassOf(typeof(SingleMovePiece)))
         {
             foreach (int2 move in pieceMoves)
             {
@@ -187,10 +230,9 @@ public class Controller
             PieceType.Gold => currentPlayer.sideBoard.golds.Dequeue(),
             _ => null
         };
-
     }
 
-    void UpdateCemetaryCount(PieceType pieceType)
+    /*void UpdateCemetaryCount(PieceType pieceType)
     {
         Player currentPlayer = curentTurn == Team.White ? whitePlayer : blackPlayer;
 
@@ -225,52 +267,71 @@ public class Controller
                 view.UpdateCemetary(curentTurn, pieceType, currentPlayer.sideBoard.golds.Count);
                 break;
         }
-    }
+    }*/
 
     void EatPiece(ref Piece eatenPiece)
     {
+        if (eatenPiece.type == PieceType.King)
+        {
+            string Win = curentTurn == Team.White ? "White Player Wins" : "Black Player Wins";
+            Debug.Log(Win);
+        }
         eatenPiece.coor = new int2(-1, -1);
         eatenPiece.team = curentTurn;
+
+        if (eatenPiece.upgradable) //Comer pieza que se puede mejorar
+        {
+            eatenPiece.otherSidePiece.team = curentTurn;
+        }
+
+        if (eatenPiece.GetType().IsSubclassOf(typeof(UpgradedPiece))) //Comer pieza mejorada
+        {
+            eatenPiece.otherSidePiece.team = curentTurn;
+            eatenPiece = eatenPiece.otherSidePiece;
+        }
+
         Player currentPlayer = curentTurn == Team.White ? whitePlayer : blackPlayer;
 
         switch (eatenPiece.type)
         {
             case PieceType.Pawn:
+                //Debug.Log(currentPlayer);
                 currentPlayer.sideBoard.pawns.Enqueue((Pawn)eatenPiece);
-                view.UpdateCemetary(curentTurn, eatenPiece.type, currentPlayer.sideBoard.pawns.Count);
+                //view.UpdateCemetary(curentTurn, eatenPiece.type, currentPlayer.sideBoard.pawns.Count);
                 break;
             case PieceType.Spear:
                 currentPlayer.sideBoard.spears.Enqueue((Spear)eatenPiece);
-                view.UpdateCemetary(curentTurn, eatenPiece.type, currentPlayer.sideBoard.spears.Count);
+                //view.UpdateCemetary(curentTurn, eatenPiece.type, currentPlayer.sideBoard.spears.Count);
                 break;
             case PieceType.Horse:
                 currentPlayer.sideBoard.horses.Enqueue((Horse)eatenPiece);
-                view.UpdateCemetary(curentTurn, eatenPiece.type, currentPlayer.sideBoard.horses.Count);
+                //view.UpdateCemetary(curentTurn, eatenPiece.type, currentPlayer.sideBoard.horses.Count);
                 break;
             case PieceType.Bishop:
                 currentPlayer.sideBoard.bishops.Enqueue((Bishop)eatenPiece);
-                view.UpdateCemetary(curentTurn, eatenPiece.type, currentPlayer.sideBoard.bishops.Count);
+                //view.UpdateCemetary(curentTurn, eatenPiece.type, currentPlayer.sideBoard.bishops.Count);
                 break;
             case PieceType.Tower:
                 currentPlayer.sideBoard.towers.Enqueue((Tower)eatenPiece);
-                view.UpdateCemetary(curentTurn, eatenPiece.type, currentPlayer.sideBoard.towers.Count);
+                //view.UpdateCemetary(curentTurn, eatenPiece.type, currentPlayer.sideBoard.towers.Count);
                 break;
             case PieceType.Silver:
                 currentPlayer.sideBoard.silvers.Enqueue((Silver)eatenPiece);
-                view.UpdateCemetary(curentTurn, eatenPiece.type, currentPlayer.sideBoard.silvers.Count);
+                //view.UpdateCemetary(curentTurn, eatenPiece.type, currentPlayer.sideBoard.silvers.Count);
                 break;
             case PieceType.Gold:
                 currentPlayer.sideBoard.golds.Enqueue((Gold)eatenPiece);
-                view.UpdateCemetary(curentTurn, eatenPiece.type, currentPlayer.sideBoard.golds.Count);
+                //view.UpdateCemetary(curentTurn, eatenPiece.type, currentPlayer.sideBoard.golds.Count);
                 break;
         }
     }
 
     void MoveSelectedPiece(Square selectedSquare)
     {
+        int2 prevPos = selectedPiece.coor;
         if (selectedPiece.coor.x >= 0) RemovePiece(selectedPiece.coor);
-        RemovePiece(selectedPiece.coor);
         AddPiece(ref selectedPiece, selectedSquare.Coor);
+        CheckForUpgradeRequirements(selectedPiece, prevPos);
         selectedPiece = null;
     }
 
@@ -327,8 +388,33 @@ public class Controller
     void SwitchTeam()
     {
         curentTurn = curentTurn == Team.White ? Team.Black : Team.White;
-        view.EnableTeamCemetary(curentTurn);
+        //view.EnableTeamCemetary(curentTurn);
     }
+
+    #region Piece Upgrading
+
+    void UpgradePiece(Piece pieceToUpgrade)
+    {
+        if (!pieceToUpgrade.upgradable) return;
+        RemovePiece(pieceToUpgrade.coor);
+        AddPiece(ref pieceToUpgrade.otherSidePiece, pieceToUpgrade.coor);
+        pieceToUpgrade.coor = new int2(-1, -1);
+    }
+
+    void CheckForUpgradeRequirements(Piece pieceToUpgrade, int2 prevPos)
+    {
+        if (!pieceToUpgrade.upgradable) return;
+        if (prevPos.y < 0) return;
+        int upperEnemyRow = curentTurn == Team.White ? 0 : ROWS -3;
+        int lowerEnemyRow = curentTurn == Team.White ? 2 : ROWS -1;
+
+        int pieceRow = pieceToUpgrade.coor.y;
+
+        if (pieceRow >= upperEnemyRow && pieceRow <= lowerEnemyRow) UpgradePiece(pieceToUpgrade);
+        else if (prevPos.y >= upperEnemyRow && prevPos.y <= lowerEnemyRow) UpgradePiece(pieceToUpgrade);
+    }
+    #endregion
+
     ~Controller()
     {
 
